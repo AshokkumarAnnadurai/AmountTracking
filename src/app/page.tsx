@@ -19,8 +19,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LanguageProvider, useLanguage } from "@/hooks/use-language";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 const getYears = () => {
   const currentYear = new Date().getFullYear();
@@ -31,6 +43,72 @@ const getYears = () => {
   return years;
 };
 
+function AdminLoginDialog({ onLogin }: { onLogin: (email: string, pass: string) => Promise<void> }) {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { t } = useLanguage();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onLogin(email, password);
+    setIsOpen(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <LogIn className="h-4 w-4" />
+          <span className="sr-only sm:not-sr-only sm:ml-2">Admin Login</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Admin Login</DialogTitle>
+            <DialogDescription>
+              Please enter your admin credentials to login.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="col-span-3"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit">Login</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 function UtsavHisabDashboardContent() {
   const [contributors, setContributors] = React.useState<Contributor[]>([]);
   const [expenses, setExpenses] = React.useState<Expense[]>([]);
@@ -39,7 +117,8 @@ function UtsavHisabDashboardContent() {
   const [selectedYear, setSelectedYear] = React.useState(new Date().getFullYear());
   const availableYears = getYears();
   const { t, setLanguage, language } = useLanguage();
-  const { user, isAdmin, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, isAdmin, loading: authLoading, signInWithEmail, signOut } = useAuth();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     async function loadData() {
@@ -96,6 +175,18 @@ function UtsavHisabDashboardContent() {
     const added = await addProgram(programWithYear);
     setPrograms((prev) => [added, ...prev]);
   };
+
+  const handleLogin = async (email: string, pass: string) => {
+    try {
+      await signInWithEmail(email, pass);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message,
+      })
+    }
+  }
   
   if (loading || authLoading) {
     return (
@@ -118,10 +209,7 @@ function UtsavHisabDashboardContent() {
               <span className="sr-only sm:not-sr-only sm:ml-2">Logout</span>
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={signInWithGoogle}>
-              <LogIn className="h-4 w-4" />
-              <span className="sr-only sm:not-sr-only sm:ml-2">Admin Login</span>
-            </Button>
+            <AdminLoginDialog onLogin={handleLogin} />
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
