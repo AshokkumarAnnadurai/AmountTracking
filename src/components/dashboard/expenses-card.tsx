@@ -82,7 +82,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
     setIsOpen(false);
   }
   
-  const formatCurrency = (amount: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(amount);
+  const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
 
   return (
     <Card className="h-full flex flex-col">
@@ -121,7 +121,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
                   )} />
                   <FormField name="amount" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount (₹)</FormLabel>
+                      <FormLabel>Amount (Rs)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g. 5000" {...field} />
                       </FormControl>
