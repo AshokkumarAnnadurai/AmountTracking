@@ -1,16 +1,15 @@
 import { db } from '@/lib/firebase';
 import type { Expense } from '@/lib/types';
-import { collection, addDoc, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 
 // Fetch all expenses for a given year
 export const getExpenses = async (year: number): Promise<Expense[]> => {
   const q = query(
     collection(db, 'expenses'), 
-    where('year', '==', year),
-    orderBy('date', 'desc')
+    where('year', '==', year)
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  const expenses = querySnapshot.docs.map(doc => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -21,6 +20,8 @@ export const getExpenses = async (year: number): Promise<Expense[]> => {
       year: data.year
     } as Expense;
   });
+  // Sort by date in descending order
+  return expenses.sort((a, b) => (b.date as Date).getTime() - (a.date as Date).getTime());
 };
 
 // Add a new expense

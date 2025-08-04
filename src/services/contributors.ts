@@ -1,16 +1,15 @@
 import { db } from '@/lib/firebase';
 import type { Contributor } from '@/lib/types';
-import { collection, addDoc, getDocs, serverTimestamp, query, orderBy, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, serverTimestamp, query, where } from 'firebase/firestore';
 
 // Fetch all contributors for a given year
 export const getContributors = async (year: number): Promise<Contributor[]> => {
   const q = query(
     collection(db, 'contributors'), 
-    where('year', '==', year),
-    orderBy('date', 'desc')
+    where('year', '==', year)
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  const contributors = querySnapshot.docs.map(doc => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -20,6 +19,8 @@ export const getContributors = async (year: number): Promise<Contributor[]> => {
       year: data.year,
     } as Contributor
   });
+  // Sort by date in descending order
+  return contributors.sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
 // Add a new contributor

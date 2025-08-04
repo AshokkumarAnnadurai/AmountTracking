@@ -6,9 +6,9 @@ service cloud.firestore {
   
     // Helper function to check if the user is the admin
     function isAdmin() {
-      // IMPORTANT: Replace 'YOUR_ADMIN_UID_HERE' with the actual Admin User's UID from Firebase Authentication
+      // IMPORTANT: Replace 'cZ0Bfs8b7mWwZmISLLtHy5FKYvS2' with the actual Admin User's UID from Firebase Authentication
       // You can find the UID in the Firebase Console under Authentication -> Users.
-      let adminUid = "YOUR_ADMIN_UID_HERE";
+      let adminUid = "cZ0Bfs8b7mWwZmISLLtHy5FKYvS2";
       return request.auth != null && request.auth.uid == adminUid;
     }
   
