@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -18,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_ADMIN_UID: process.env.NEXT_PUBLIC_ADMIN_UID,
+  }
 };
 
 export default nextConfig;

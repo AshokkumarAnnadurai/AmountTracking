@@ -58,9 +58,10 @@ const contributionSchema = (t: Function) => z.object({
 interface ContributionsCardProps {
   contributors: Contributor[];
   onAddContributor: (contributor: Omit<Contributor, "id" | "date" | "year">) => Promise<void>;
+  isAdmin: boolean;
 }
 
-export function ContributionsCard({ contributors, onAddContributor }: ContributionsCardProps) {
+export function ContributionsCard({ contributors, onAddContributor, isAdmin }: ContributionsCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -114,59 +115,61 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
             {t('contributions.description')}
           </CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                {t('addNew')}
-              </span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <DialogHeader>
-                  <DialogTitle>{t('contributions.form.title')}</DialogTitle>
-                  <DialogDescription>
-                    {t('contributions.form.description')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('contributions.form.nameLabel')}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('contributions.form.namePlaceholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('contributions.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder={t('contributions.form.amountPlaceholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <DialogFooter>
-                  <Button type="submit">{t('contributions.form.submit')}</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        {isAdmin && (
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  {t('addNew')}
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <DialogHeader>
+                    <DialogTitle>{t('contributions.form.title')}</DialogTitle>
+                    <DialogDescription>
+                      {t('contributions.form.description')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('contributions.form.nameLabel')}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={t('contributions.form.namePlaceholder')} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('contributions.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder={t('contributions.form.amountPlaceholder')} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit">{t('contributions.form.submit')}</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent className="flex-grow">
         <ScrollArea className="h-[350px]">

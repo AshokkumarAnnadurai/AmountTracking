@@ -52,9 +52,10 @@ const programSchema = (t: Function) => z.object({
 interface ProgramsCardProps {
   programs: Program[];
   onAddProgram: (program: Omit<Program, "id" | "year">) => Promise<void>;
+  isAdmin: boolean;
 }
 
-export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
+export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -105,67 +106,69 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
             {t('programs.description')}
           </CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                {t('addNew')}
-              </span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <DialogHeader>
-                  <DialogTitle>{t('programs.form.title')}</DialogTitle>
-                  <DialogDescription>
-                    {t('programs.form.description')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <FormField name="name" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('programs.form.nameLabel')}</FormLabel>
-                      <FormControl><Input placeholder={t('programs.form.namePlaceholder')} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField name="organizer" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('programs.form.organizerLabel')}</FormLabel>
-                      <FormControl><Input placeholder={t('programs.form.organizerPlaceholder')} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField
-                    control={form.control}
-                    name="budgetedAmount"
-                    render={({ field }) => (
+        {isAdmin && (
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  {t('addNew')}
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <DialogHeader>
+                    <DialogTitle>{t('programs.form.title')}</DialogTitle>
+                    <DialogDescription>
+                      {t('programs.form.description')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <FormField name="name" control={form.control} render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('programs.form.budgetLabel', { currency: t('currencySymbol') })}</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder={t('programs.form.budgetPlaceholder')} {...field} />
-                        </FormControl>
+                        <FormLabel>{t('programs.form.nameLabel')}</FormLabel>
+                        <FormControl><Input placeholder={t('programs.form.namePlaceholder')} {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <FormField name="notes" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('programs.form.notesLabel')}</FormLabel>
-                      <FormControl><Textarea placeholder={t('programs.form.notesPlaceholder')} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-                <DialogFooter>
-                  <Button type="submit">{t('programs.form.submit')}</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                    )} />
+                    <FormField name="organizer" control={form.control} render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('programs.form.organizerLabel')}</FormLabel>
+                        <FormControl><Input placeholder={t('programs.form.organizerPlaceholder')} {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField
+                      control={form.control}
+                      name="budgetedAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('programs.form.budgetLabel', { currency: t('currencySymbol') })}</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder={t('programs.form.budgetPlaceholder')} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField name="notes" control={form.control} render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('programs.form.notesLabel')}</FormLabel>
+                        <FormControl><Textarea placeholder={t('programs.form.notesPlaceholder')} {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit">{t('programs.form.submit')}</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent className="flex-grow">
         <ScrollArea className="h-[350px]">

@@ -11,7 +11,7 @@ import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { ContributionsCard } from "@/components/dashboard/contributions-card";
 import { ExpensesCard } from "@/components/dashboard/expenses-card";
 import { ProgramsCard } from "@/components/dashboard/programs-card";
-import { Sparkles, Loader2, Calendar, Languages } from "lucide-react";
+import { Sparkles, Loader2, Calendar, Languages, LogIn, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { LanguageProvider, useLanguage } from "@/hooks/use-language";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const getYears = () => {
   const currentYear = new Date().getFullYear();
@@ -38,6 +39,7 @@ function UtsavHisabDashboardContent() {
   const [selectedYear, setSelectedYear] = React.useState(new Date().getFullYear());
   const availableYears = getYears();
   const { t, setLanguage, language } = useLanguage();
+  const { user, isAdmin, loading: authLoading, signInWithGoogle, signOut } = useAuth();
 
   React.useEffect(() => {
     async function loadData() {
@@ -95,7 +97,7 @@ function UtsavHisabDashboardContent() {
     setPrograms((prev) => [added, ...prev]);
   };
   
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -110,6 +112,17 @@ function UtsavHisabDashboardContent() {
         <Sparkles className="h-6 w-6 text-primary" />
         <h1 className="text-xl font-semibold text-foreground">{t('appTitle')}</h1>
         <div className="ml-auto flex items-center gap-4">
+           {user ? (
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:ml-2">Logout</span>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={signInWithGoogle}>
+              <LogIn className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:ml-2">Admin Login</span>
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -156,13 +169,14 @@ function UtsavHisabDashboardContent() {
             <ContributionsCard
               contributors={contributors}
               onAddContributor={handleAddContributor}
+              isAdmin={isAdmin}
             />
           </div>
           <div className="xl:col-span-1">
-            <ExpensesCard expenses={expenses} onAddExpense={handleAddExpense} />
+            <ExpensesCard expenses={expenses} onAddExpense={handleAddExpense} isAdmin={isAdmin} />
           </div>
           <div className="xl:col-span-1">
-            <ProgramsCard programs={programs} onAddProgram={handleAddProgram} />
+            <ProgramsCard programs={programs} onAddProgram={handleAddProgram} isAdmin={isAdmin} />
           </div>
         </div>
       </main>
@@ -172,8 +186,10 @@ function UtsavHisabDashboardContent() {
 
 export default function UtsavHisabDashboard() {
   return (
-    <LanguageProvider>
-      <UtsavHisabDashboardContent />
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <UtsavHisabDashboardContent />
+      </LanguageProvider>
+    </AuthProvider>
   )
 }

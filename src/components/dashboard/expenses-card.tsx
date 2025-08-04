@@ -66,9 +66,10 @@ const expenseSchema = (t: Function) => z.object({
 interface ExpensesCardProps {
   expenses: Expense[];
   onAddExpense: (expense: Omit<Expense, "id" | "year">) => Promise<void>;
+  isAdmin: boolean;
 }
 
-export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
+export function ExpensesCard({ expenses, onAddExpense, isAdmin }: ExpensesCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -120,88 +121,90 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
           <CardTitle>{t('expenses.title')}</CardTitle>
           <CardDescription>{t('expenses.description')}</CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                {t('addNew')}
-              </span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <DialogHeader>
-                  <DialogTitle>{t('expenses.form.title')}</DialogTitle>
-                  <DialogDescription>
-                    {t('expenses.form.description')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <FormField name="reason" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('expenses.form.reasonLabel')}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={t('expenses.form.reasonPlaceholder')} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField name="amount" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('expenses.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder={t('expenses.form.amountPlaceholder')} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                   <FormField name="category" control={form.control} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('expenses.form.categoryLabel')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+        {isAdmin && (
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  {t('addNew')}
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <DialogHeader>
+                    <DialogTitle>{t('expenses.form.title')}</DialogTitle>
+                    <DialogDescription>
+                      {t('expenses.form.description')}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <FormField name="reason" control={form.control} render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('expenses.form.reasonLabel')}</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('expenses.form.categoryPlaceholder')} />
-                          </SelectTrigger>
+                          <Input placeholder={t('expenses.form.reasonPlaceholder')} {...field} />
                         </FormControl>
-                        <SelectContent>
-                          {expenseCategories.map(cat => (
-                            <SelectItem key={cat} value={cat}>{t(`expenseCategories.${cat}`)}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField name="date" control={form.control} render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t('expenses.form.dateLabel')}</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField name="amount" control={form.control} render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('expenses.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder={t('expenses.form.amountPlaceholder')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                     <FormField name="category" control={form.control} render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('expenses.form.categoryLabel')}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                              {field.value ? format(field.value, "PPP") : <span>{t('expenses.form.datePlaceholder')}</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('expenses.form.categoryPlaceholder')} />
+                            </SelectTrigger>
                           </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-                <DialogFooter>
-                  <Button type="submit">{t('expenses.form.submit')}</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                          <SelectContent>
+                            {expenseCategories.map(cat => (
+                              <SelectItem key={cat} value={cat}>{t(`expenseCategories.${cat}`)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField name="date" control={form.control} render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t('expenses.form.dateLabel')}</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                {field.value ? format(field.value, "PPP") : <span>{t('expenses.form.datePlaceholder')}</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit">{t('expenses.form.submit')}</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent className="flex-grow">
         <ScrollArea className="h-[350px]">
