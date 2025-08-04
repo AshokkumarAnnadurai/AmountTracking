@@ -47,7 +47,7 @@ const programSchema = z.object({
 
 interface ProgramsCardProps {
   programs: Program[];
-  onAddProgram: (program: Omit<Program, "id">) => void;
+  onAddProgram: (program: Omit<Program, "id">) => Promise<void>;
 }
 
 export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
@@ -58,8 +58,8 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
     defaultValues: { name: "", organizer: "", notes: "" },
   });
 
-  function onSubmit(values: z.infer<typeof programSchema>) {
-    onAddProgram(values);
+  async function onSubmit(values: z.infer<typeof programSchema>) {
+    await onAddProgram(values);
     toast({
       title: "Success!",
       description: `Program "${values.name}" has been added.`,
@@ -112,7 +112,7 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
                   )} />
                   <FormField name="notes" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes for next year</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl><Textarea placeholder="Any special instructions or contacts..." {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,7 +146,7 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
           </Accordion>
         ) : (
           <div className="flex items-center justify-center h-24 text-center text-muted-foreground">
-              No programs added yet.
+              No programs added yet. Add one to get started.
           </div>
         )}
         </ScrollArea>

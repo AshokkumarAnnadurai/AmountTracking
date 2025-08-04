@@ -1,8 +1,10 @@
+import { Timestamp } from "firebase/firestore";
+
 export type Contributor = {
   id: string;
   name: string;
   amount: number;
-  date: Date;
+  date: Date | Timestamp;
 };
 
 export const expenseCategories = ['Food', 'Decoration', 'Cultural Event', 'Pooja', 'Travel', 'Miscellaneous'] as const;
@@ -13,7 +15,7 @@ export type Expense = {
   id: string;
   reason: string;
   amount: number;
-  date: Date;
+  date: Date | Timestamp;
   category: ExpenseCategory;
 };
 

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, Users } from "lucide-react";
 import { format } from "date-fns";
+import type { Timestamp } from "firebase/firestore";
 
 import type { Contributor } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ const contributionSchema = z.object({
 
 interface ContributionsCardProps {
   contributors: Contributor[];
-  onAddContributor: (contributor: Omit<Contributor, "id">) => void;
+  onAddContributor: (contributor: Omit<Contributor, "id" | "date">) => Promise<void>;
 }
 
 export function ContributionsCard({ contributors, onAddContributor }: ContributionsCardProps) {
@@ -63,8 +64,8 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
     defaultValues: { name: "", amount: 0 },
   });
 
-  function onSubmit(values: z.infer<typeof contributionSchema>) {
-    onAddContributor({ ...values, date: new Date() });
+  async function onSubmit(values: z.infer<typeof contributionSchema>) {
+    await onAddContributor(values);
     toast({
       title: "Success!",
       description: `${values.name} has been added to contributors.`,
@@ -74,6 +75,9 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
   }
   
   const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  const formatDate = (date: Date | Timestamp) => {
+    return format(date instanceof Date ? date : date.toDate(), "PPP");
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -154,7 +158,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
                     <TableCell>
                       <div className="font-medium">{c.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {format(c.date, "PPP")}
+                        {formatDate(c.date)}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{formatCurrency(c.amount)}</TableCell>
@@ -163,7 +167,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
               ) : (
                 <TableRow>
                   <TableCell colSpan={2} className="h-24 text-center">
-                    No contributions yet.
+                    No contributions yet. Add one to get started.
                   </TableCell>
                 </TableRow>
               )}

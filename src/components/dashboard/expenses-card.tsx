@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, PlusCircle, ReceiptText } from "lucide-react";
 import { format } from "date-fns";
+import type { Timestamp } from "firebase/firestore";
 
 import type { Expense } from "@/lib/types";
 import { expenseCategories } from "@/lib/types";
@@ -61,7 +62,7 @@ const expenseSchema = z.object({
 
 interface ExpensesCardProps {
   expenses: Expense[];
-  onAddExpense: (expense: Omit<Expense, "id">) => void;
+  onAddExpense: (expense: Omit<Expense, "id">) => Promise<void>;
 }
 
 export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
@@ -72,8 +73,8 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
     defaultValues: { reason: "", amount: 0, date: new Date(), category: 'Miscellaneous' },
   });
 
-  function onSubmit(values: z.infer<typeof expenseSchema>) {
-    onAddExpense(values);
+  async function onSubmit(values: z.infer<typeof expenseSchema>) {
+    await onAddExpense(values);
     toast({
       title: "Success!",
       description: `Expense for ${values.reason} has been added.`,
@@ -83,6 +84,9 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
   }
   
   const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  const formatDate = (date: Date | Timestamp) => {
+    return format(date instanceof Date ? date : date.toDate(), "PPP");
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -193,7 +197,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
                        {e.reason}
                     </div>
                     <div className="text-sm text-muted-foreground ml-6">
-                      {format(e.date, "PPP")}
+                      {formatDate(e.date)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">{formatCurrency(e.amount)}</TableCell>
@@ -202,7 +206,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={2} className="h-24 text-center">
-                  No expenses yet.
+                  No expenses yet. Add one to get started.
                 </TableCell>
               </TableRow>
             )}
