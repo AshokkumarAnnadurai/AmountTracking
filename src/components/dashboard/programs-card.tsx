@@ -217,21 +217,23 @@ export function ProgramsCard({ programs, onAddProgram, onUpdateProgram, isAdmin 
           <Accordion type="single" collapsible className="w-full">
             {programs.map((p) => (
               <AccordionItem value={p.id} key={p.id}>
-                <div className="flex items-center w-full">
+                <div className="flex items-center justify-between w-full">
                   <AccordionTrigger className="flex-grow">
                     <div className="flex flex-col items-start text-left w-full">
                       <div className="flex justify-between w-full">
                         <span className="font-medium">{p.name}</span>
-                        <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
                       </div>
                       <span className="text-sm text-muted-foreground">{t('programs.organizer')}: {p.organizer}</span>
                     </div>
                   </AccordionTrigger>
                   {isAdmin && (
+                    <div className="flex items-center">
+                        <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
                      <Button variant="ghost" size="icon" className="mr-2" onClick={() => setEditProgram(p)}>
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit Program</span>
                       </Button>
+                      </div>
                   )}
                 </div>
                 <AccordionContent>
