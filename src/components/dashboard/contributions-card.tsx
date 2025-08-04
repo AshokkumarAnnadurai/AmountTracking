@@ -121,7 +121,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Amount (INR)</FormLabel>
+                        <FormLabel>Amount (₹)</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="e.g. 1001" {...field} />
                         </FormControl>

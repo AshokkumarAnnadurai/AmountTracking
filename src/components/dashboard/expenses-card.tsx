@@ -121,7 +121,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
                   )} />
                   <FormField name="amount" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount (INR)</FormLabel>
+                      <FormLabel>Amount (₹)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g. 5000" {...field} />
                       </FormControl>
