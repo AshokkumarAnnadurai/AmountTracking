@@ -226,15 +226,15 @@ export function ProgramsCard({ programs, onAddProgram, onUpdateProgram, isAdmin 
                       <span className="text-sm text-muted-foreground">{t('programs.organizer')}: {p.organizer}</span>
                     </div>
                   </AccordionTrigger>
-                  {isAdmin && (
-                    <div className="flex items-center">
-                        <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
-                     <Button variant="ghost" size="icon" className="mr-2" onClick={() => setEditProgram(p)}>
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Edit Program</span>
-                      </Button>
-                      </div>
-                  )}
+                   <div className="flex items-center pr-4">
+                      <span className="font-semibold text-right w-24">{formatCurrency(p.budgetedAmount)}</span>
+                      {isAdmin && (
+                        <Button variant="ghost" size="icon" className="ml-2" onClick={() => setEditProgram(p)}>
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit Program</span>
+                        </Button>
+                      )}
+                    </div>
                 </div>
                 <AccordionContent>
                   <p className="text-sm text-foreground/80 whitespace-pre-wrap">{p.notes || t('programs.noNotes')}</p>
@@ -274,4 +274,3 @@ export function ProgramsCard({ programs, onAddProgram, onUpdateProgram, isAdmin 
     </Card>
   );
 }
-
