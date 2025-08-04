@@ -120,6 +120,8 @@ function UtsavHisabDashboardContent() {
   const { user, isAdmin, loading: authLoading, signInWithEmail, signOut } = useAuth();
   const { toast } = useToast();
 
+  console.log('iaAdmin' , isAdmin)
+
   React.useEffect(() => {
     async function loadData() {
       setLoading(true);

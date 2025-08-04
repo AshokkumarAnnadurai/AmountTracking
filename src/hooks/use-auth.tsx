@@ -15,7 +15,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// IMPORTANT: Replace this with the actual Admin User's UID from Firebase Authentication
 const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -36,12 +35,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signInWithEmail = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
+    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+    // Explicitly update state after sign-in to ensure UI reacts immediately
+    const loggedInUser = userCredential.user;
+    setUser(loggedInUser);
+    setIsAdmin(!!loggedInUser && !!ADMIN_UID && loggedInUser.uid === ADMIN_UID);
   };
 
   const performSignOut = async () => {
     try {
       await signOut(auth);
+      // Explicitly clear state on sign-out
+      setUser(null);
+      setIsAdmin(false);
     } catch (error) {
       console.error("Error signing out:", error);
     }
