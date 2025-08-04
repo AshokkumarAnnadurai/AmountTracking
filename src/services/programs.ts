@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase';
 import type { Program } from '@/lib/types';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
 
 // Fetch all programs for a given year
 export const getPrograms = async (year: number): Promise<Program[]> => {
@@ -18,4 +18,10 @@ export const getPrograms = async (year: number): Promise<Program[]> => {
 export const addProgram = async (program: Omit<Program, 'id'>): Promise<Program> => {
   const docRef = await addDoc(collection(db, 'programs'), program);
   return { id: docRef.id, ...program };
+};
+
+// Update an existing program
+export const updateProgram = async (programId: string, updatedData: Partial<Omit<Program, 'id' | 'year'>>): Promise<void> => {
+  const programDoc = doc(db, 'programs', programId);
+  await updateDoc(programDoc, updatedData);
 };

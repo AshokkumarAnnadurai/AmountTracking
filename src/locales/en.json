@@ -75,6 +75,7 @@
     "noPrograms": "No programs added yet. Add one to get started.",
     "form": {
       "title": "Add New Program",
+      "editTitle": "Edit Program",
       "description": "Enter the details of the cultural program.",
       "nameLabel": "Program Name",
       "namePlaceholder": "e.g. Kerala Sendai Melam",
@@ -84,7 +85,8 @@
       "budgetPlaceholder": "e.g. 15000",
       "notesLabel": "Notes",
       "notesPlaceholder": "Any special instructions or contacts...",
-      "submit": "Add Program"
+      "submit": "Add Program",
+      "update": "Update Program"
     }
   },
 
@@ -101,7 +103,8 @@
     "success": "Success!",
     "contributorAdded": "{{name}} has been added to contributors.",
     "expenseAdded": "Expense for {{reason}} has been added.",
-    "programAdded": "Program \"{{name}}\" has been added."
+    "programAdded": "Program \"{{name}}\" has been added.",
+    "programUpdated": "Program \"{{name}}\" has been updated."
   },
 
   "validation": {

@@ -5,7 +5,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusCircle, ListMusic, Download } from "lucide-react";
+import { PlusCircle, ListMusic, Download, Pencil } from "lucide-react";
 
 import type { Program } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -49,31 +49,117 @@ const programSchema = (t: Function) => z.object({
   notes: z.string().optional(),
 });
 
+type ProgramFormData = z.infer<ReturnType<typeof programSchema>>;
+
+function ProgramForm({
+  onSubmit,
+  initialValues,
+  isEdit = false,
+}: {
+  onSubmit: (values: ProgramFormData) => Promise<void>;
+  initialValues: ProgramFormData;
+  isEdit?: boolean;
+}) {
+  const { t } = useLanguage();
+  const form = useForm<ProgramFormData>({
+    resolver: zodResolver(programSchema(t)),
+    defaultValues: initialValues,
+  });
+
+  React.useEffect(() => {
+    form.reset(initialValues);
+  }, [initialValues, form]);
+
+  const handleSubmit = async (values: ProgramFormData) => {
+    await onSubmit(values);
+    form.reset();
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <DialogHeader>
+          <DialogTitle>{isEdit ? t('programs.form.editTitle') : t('programs.form.title')}</DialogTitle>
+          <DialogDescription>
+            {t('programs.form.description')}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <FormField name="name" control={form.control} render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('programs.form.nameLabel')}</FormLabel>
+              <FormControl><Input placeholder={t('programs.form.namePlaceholder')} {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField name="organizer" control={form.control} render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('programs.form.organizerLabel')}</FormLabel>
+              <FormControl><Input placeholder={t('programs.form.organizerPlaceholder')} {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField
+            control={form.control}
+            name="budgetedAmount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('programs.form.budgetLabel', { currency: t('currencySymbol') })}</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder={t('programs.form.budgetPlaceholder')} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField name="notes" control={form.control} render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('programs.form.notesLabel')}</FormLabel>
+              <FormControl><Textarea placeholder={t('programs.form.notesPlaceholder')} {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+        <DialogFooter>
+          <Button type="submit">{isEdit ? t('programs.form.update') : t('programs.form.submit')}</Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
+
+
 interface ProgramsCardProps {
   programs: Program[];
   onAddProgram: (program: Omit<Program, "id" | "year">) => Promise<void>;
+  onUpdateProgram: (programId: string, program: Omit<Program, "id" | "year">) => Promise<void>;
   isAdmin: boolean;
 }
 
-export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+export function ProgramsCard({ programs, onAddProgram, onUpdateProgram, isAdmin }: ProgramsCardProps) {
+  const [isAddOpen, setAddOpen] = React.useState(false);
+  const [editProgram, setEditProgram] = React.useState<Program | null>(null);
   const { toast } = useToast();
   const { t } = useLanguage();
-
-  const form = useForm<z.infer<ReturnType<typeof programSchema>>>({
-    resolver: zodResolver(programSchema(t)),
-    defaultValues: { name: "", organizer: "", budgetedAmount: 0, notes: "" },
-  });
-
-  async function onSubmit(values: z.infer<ReturnType<typeof programSchema>>) {
+  
+  const handleAddSubmit = async (values: ProgramFormData) => {
     await onAddProgram(values);
     toast({
       title: t('toast.success'),
       description: t('toast.programAdded', { name: values.name }),
     });
-    form.reset();
-    setIsOpen(false);
-  }
+    setAddOpen(false);
+  };
+  
+  const handleEditSubmit = async (values: ProgramFormData) => {
+    if (!editProgram) return;
+    await onUpdateProgram(editProgram.id, values);
+    toast({
+      title: t('toast.success'),
+      description: t('toast.programUpdated', { name: values.name }),
+    });
+    setEditProgram(null);
+  };
 
   const formatCurrency = (amount: number) => `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
   
@@ -107,7 +193,7 @@ export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardPr
           </CardDescription>
         </div>
         {isAdmin && (
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <Dialog open={isAddOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
                 <PlusCircle className="h-3.5 w-3.5" />
@@ -117,55 +203,10 @@ export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardPr
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <DialogHeader>
-                    <DialogTitle>{t('programs.form.title')}</DialogTitle>
-                    <DialogDescription>
-                      {t('programs.form.description')}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <FormField name="name" control={form.control} render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('programs.form.nameLabel')}</FormLabel>
-                        <FormControl><Input placeholder={t('programs.form.namePlaceholder')} {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField name="organizer" control={form.control} render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('programs.form.organizerLabel')}</FormLabel>
-                        <FormControl><Input placeholder={t('programs.form.organizerPlaceholder')} {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField
-                      control={form.control}
-                      name="budgetedAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('programs.form.budgetLabel', { currency: t('currencySymbol') })}</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder={t('programs.form.budgetPlaceholder')} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField name="notes" control={form.control} render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('programs.form.notesLabel')}</FormLabel>
-                        <FormControl><Textarea placeholder={t('programs.form.notesPlaceholder')} {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">{t('programs.form.submit')}</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
+              <ProgramForm
+                onSubmit={handleAddSubmit}
+                initialValues={{ name: "", organizer: "", budgetedAmount: 0, notes: "" }}
+              />
             </DialogContent>
           </Dialog>
         )}
@@ -176,15 +217,23 @@ export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardPr
           <Accordion type="single" collapsible className="w-full">
             {programs.map((p) => (
               <AccordionItem value={p.id} key={p.id}>
-                <AccordionTrigger>
-                  <div className="flex flex-col items-start text-left w-full">
-                    <div className="flex justify-between w-full">
-                      <span className="font-medium">{p.name}</span>
-                      <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
+                <div className="flex items-center w-full">
+                  <AccordionTrigger className="flex-grow">
+                    <div className="flex flex-col items-start text-left w-full">
+                      <div className="flex justify-between w-full">
+                        <span className="font-medium">{p.name}</span>
+                        <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{t('programs.organizer')}: {p.organizer}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{t('programs.organizer')}: {p.organizer}</span>
-                  </div>
-                </AccordionTrigger>
+                  </AccordionTrigger>
+                  {isAdmin && (
+                     <Button variant="ghost" size="icon" className="mr-2" onClick={() => setEditProgram(p)}>
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit Program</span>
+                      </Button>
+                  )}
+                </div>
                 <AccordionContent>
                   <p className="text-sm text-foreground/80 whitespace-pre-wrap">{p.notes || t('programs.noNotes')}</p>
                 </AccordionContent>
@@ -204,6 +253,22 @@ export function ProgramsCard({ programs, onAddProgram, isAdmin }: ProgramsCardPr
           {t('download')}
         </Button>
       </CardFooter>
+      <Dialog open={!!editProgram} onOpenChange={(isOpen) => !isOpen && setEditProgram(null)}>
+        <DialogContent>
+          {editProgram && (
+            <ProgramForm
+              onSubmit={handleEditSubmit}
+              initialValues={{
+                name: editProgram.name,
+                organizer: editProgram.organizer,
+                budgetedAmount: editProgram.budgetedAmount,
+                notes: editProgram.notes || "",
+              }}
+              isEdit={true}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

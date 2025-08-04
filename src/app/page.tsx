@@ -5,7 +5,7 @@ import * as React from "react";
 import type { Contributor, Expense, Program } from "@/lib/types";
 import { getContributors, addContributor } from "@/services/contributors";
 import { getExpenses, addExpense } from "@/services/expenses";
-import { getPrograms, addProgram } from "@/services/programs";
+import { getPrograms, addProgram, updateProgram } from "@/services/programs";
 
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { ContributionsCard } from "@/components/dashboard/contributions-card";
@@ -120,8 +120,6 @@ function UtsavHisabDashboardContent() {
   const { user, isAdmin, loading: authLoading, signInWithEmail, signOut } = useAuth();
   const { toast } = useToast();
 
-  console.log('iaAdmin' , isAdmin)
-
   React.useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -175,8 +173,13 @@ function UtsavHisabDashboardContent() {
   const handleAddProgram = async (newProgram: Omit<Program, "id" | "year">) => {
     const programWithYear = { ...newProgram, year: selectedYear };
     const added = await addProgram(programWithYear);
-    setPrograms((prev) => [added, ...prev]);
+    setPrograms((prev) => [added, ...prev].sort((a,b) => a.name.localeCompare(b.name)));
   };
+
+  const handleUpdateProgram = async (programId: string, updatedData: Omit<Program, "id" | "year">) => {
+    await updateProgram(programId, updatedData);
+    setPrograms(prev => prev.map(p => p.id === programId ? { ...p, ...updatedData } : p).sort((a,b) => a.name.localeCompare(b.name)));
+  }
 
   const handleLogin = async (email: string, pass: string) => {
     try {
@@ -266,7 +269,12 @@ function UtsavHisabDashboardContent() {
             <ExpensesCard expenses={expenses} onAddExpense={handleAddExpense} isAdmin={isAdmin} />
           </div>
           <div className="xl:col-span-1">
-            <ProgramsCard programs={programs} onAddProgram={handleAddProgram} isAdmin={isAdmin} />
+            <ProgramsCard 
+              programs={programs} 
+              onAddProgram={handleAddProgram} 
+              onUpdateProgram={handleUpdateProgram}
+              isAdmin={isAdmin} 
+            />
           </div>
         </div>
       </main>
