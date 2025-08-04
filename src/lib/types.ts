@@ -25,6 +25,7 @@ export type Program = {
   id: string;
   name: string;
   organizer: string;
-  notes: string;
+  notes?: string;
+  budgetedAmount: number;
   year: number;
 };

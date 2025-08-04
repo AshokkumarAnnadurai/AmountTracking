@@ -42,6 +42,7 @@ import { ScrollArea } from "../ui/scroll-area";
 const programSchema = z.object({
   name: z.string().min(3, { message: "Program name must be at least 3 characters." }),
   organizer: z.string().min(2, { message: "Organizer name must be at least 2 characters." }),
+  budgetedAmount: z.coerce.number().positive({ message: "Budget must be a positive number." }),
   notes: z.string().optional(),
 });
 
@@ -55,7 +56,7 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof programSchema>>({
     resolver: zodResolver(programSchema),
-    defaultValues: { name: "", organizer: "", notes: "" },
+    defaultValues: { name: "", organizer: "", budgetedAmount: 0, notes: "" },
   });
 
   async function onSubmit(values: z.infer<typeof programSchema>) {
@@ -67,6 +68,8 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
     form.reset();
     setIsOpen(false);
   }
+
+  const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
 
   return (
     <Card className="h-full flex flex-col">
@@ -110,6 +113,19 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <FormField
+                    control={form.control}
+                    name="budgetedAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Budgeted Amount (Rs)</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="e.g. 15000" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField name="notes" control={form.control} render={({ field }) => (
                     <FormItem>
                       <FormLabel>Notes</FormLabel>
@@ -133,8 +149,11 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
             {programs.map((p) => (
               <AccordionItem value={p.id} key={p.id}>
                 <AccordionTrigger>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="font-medium">{p.name}</span>
+                  <div className="flex flex-col items-start text-left w-full">
+                    <div className="flex justify-between w-full">
+                      <span className="font-medium">{p.name}</span>
+                      <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
+                    </div>
                     <span className="text-sm text-muted-foreground">Organizer: {p.organizer}</span>
                   </div>
                 </AccordionTrigger>

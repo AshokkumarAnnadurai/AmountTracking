@@ -67,6 +67,10 @@ export default function UtsavHisabDashboard() {
     () => expenses.reduce((sum, e) => sum + e.amount, 0),
     [expenses]
   );
+    const totalBudget = React.useMemo(
+    () => programs.reduce((sum, p) => sum + p.budgetedAmount, 0),
+    [programs]
+  );
   const remainingBalance = totalCollection - totalExpenses;
 
   const handleAddContributor = async (newContributor: Omit<Contributor, "id" | "date" | "year">) => {
@@ -127,6 +131,7 @@ export default function UtsavHisabDashboard() {
           totalCollection={totalCollection}
           totalExpenses={totalExpenses}
           remainingBalance={remainingBalance}
+          totalBudget={totalBudget}
           programs={programs}
         />
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">

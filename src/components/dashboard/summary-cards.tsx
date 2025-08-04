@@ -8,6 +8,9 @@ import {
   MessageCircle,
   Copy,
   Loader2,
+  Target,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,11 +26,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { generateWhatsappSummary } from "@/ai/flows/generate-whatsapp-summary";
 import type { Program } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface SummaryCardsProps {
   totalCollection: number;
   totalExpenses: number;
   remainingBalance: number;
+  totalBudget: number;
   programs: Program[];
 }
 
@@ -35,6 +40,7 @@ export function SummaryCards({
   totalCollection,
   totalExpenses,
   remainingBalance,
+  totalBudget,
   programs,
 }: SummaryCardsProps) {
   const { toast } = useToast();
@@ -84,9 +90,11 @@ export function SummaryCards({
     window.open(whatsappUrl, "_blank");
   };
 
+  const budgetStatus = totalCollection - totalBudget;
+
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -98,9 +106,6 @@ export function SummaryCards({
             <div className="text-2xl font-bold">
               {formatCurrency(totalCollection)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total contributions received
-            </p>
           </CardContent>
         </Card>
         <Card>
@@ -112,9 +117,6 @@ export function SummaryCards({
             <div className="text-2xl font-bold text-red-500">
               {formatCurrency(totalExpenses)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total amount spent so far
-            </p>
           </CardContent>
         </Card>
         <Card>
@@ -128,9 +130,20 @@ export function SummaryCards({
             <div className="text-2xl font-bold text-green-600">
               {formatCurrency(remainingBalance)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Cash in hand for expenses
-            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Budget vs Collection</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={cn("text-2xl font-bold", budgetStatus >= 0 ? "text-green-600" : "text-red-500")}>
+                {formatCurrency(budgetStatus)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {budgetStatus >= 0 ? "Surplus" : "Needed"}
+              </p>
           </CardContent>
         </Card>
         <Button
