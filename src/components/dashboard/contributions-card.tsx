@@ -53,7 +53,7 @@ const contributionSchema = z.object({
 
 interface ContributionsCardProps {
   contributors: Contributor[];
-  onAddContributor: (contributor: Omit<Contributor, "id" | "date">) => Promise<void>;
+  onAddContributor: (contributor: Omit<Contributor, "id" | "date" | "year">) => Promise<void>;
 }
 
 export function ContributionsCard({ contributors, onAddContributor }: ContributionsCardProps) {

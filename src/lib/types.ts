@@ -5,6 +5,7 @@ export type Contributor = {
   name: string;
   amount: number;
   date: Date | Timestamp;
+  year: number;
 };
 
 export const expenseCategories = ['Food', 'Decoration', 'Cultural Event', 'Pooja', 'Travel', 'Miscellaneous'] as const;
@@ -17,6 +18,7 @@ export type Expense = {
   amount: number;
   date: Date | Timestamp;
   category: ExpenseCategory;
+  year: number;
 };
 
 export type Program = {
@@ -24,4 +26,5 @@ export type Program = {
   name: string;
   organizer: string;
   notes: string;
+  year: number;
 };

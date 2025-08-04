@@ -62,7 +62,7 @@ const expenseSchema = z.object({
 
 interface ExpensesCardProps {
   expenses: Expense[];
-  onAddExpense: (expense: Omit<Expense, "id">) => Promise<void>;
+  onAddExpense: (expense: Omit<Expense, "id" | "year">) => Promise<void>;
 }
 
 export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {

@@ -47,7 +47,7 @@ const programSchema = z.object({
 
 interface ProgramsCardProps {
   programs: Program[];
-  onAddProgram: (program: Omit<Program, "id">) => Promise<void>;
+  onAddProgram: (program: Omit<Program, "id" | "year">) => Promise<void>;
 }
 
 export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
