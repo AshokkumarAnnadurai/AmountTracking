@@ -24,9 +24,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    if (!ADMIN_UID) {
+      console.error("NEXT_PUBLIC_ADMIN_UID is not set in the environment variables.");
+    }
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsAdmin(currentUser?.uid === ADMIN_UID);
+      setIsAdmin(!!currentUser && !!ADMIN_UID && currentUser.uid === ADMIN_UID);
       setLoading(false);
     });
     return () => unsubscribe();
