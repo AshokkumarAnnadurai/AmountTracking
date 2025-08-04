@@ -5,7 +5,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusCircle, Users } from "lucide-react";
+import { PlusCircle, Users, Download } from "lucide-react";
 import { format } from "date-fns";
 import type { Timestamp } from "firebase/firestore";
 
@@ -17,6 +17,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -84,6 +85,26 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
     return format(date instanceof Date ? date : date.toDate(), "PPP");
   }
 
+  const handleDownload = () => {
+    const headers = ["Contributor", "Amount", "Date"];
+    const csvContent = [
+      headers.join(","),
+      ...contributors.map(c => [c.name, c.amount, formatDate(c.date)].join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", "contributions.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center">
@@ -148,7 +169,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
         </Dialog>
       </CardHeader>
       <CardContent className="flex-grow">
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[350px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -180,6 +201,12 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
           </Table>
         </ScrollArea>
       </CardContent>
+      <CardFooter className="justify-end border-t pt-4">
+        <Button variant="outline" size="sm" onClick={handleDownload} disabled={contributors.length === 0}>
+          <Download className="h-3.5 w-3.5 mr-2" />
+          {t('download')}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

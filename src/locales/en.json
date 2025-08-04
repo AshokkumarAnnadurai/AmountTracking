@@ -4,6 +4,7 @@
   "loading": "Loading Festival Data for {{year}}...",
   "currencySymbol": "Rs",
   "addNew": "Add New",
+  "download": "Download",
 
   "totalCollection": "Total Collection",
   "totalExpenses": "Total Expenses",

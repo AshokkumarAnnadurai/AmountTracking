@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -35,7 +36,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert in creating concise and informative summaries for sharing on WhatsApp.
 
   Based on the following information about the village festival, create a summary that includes key details about collections, expenses, and upcoming events.
-  The summary should be engaging and easy to understand for all villagers.
+  The summary should be engaging and easy to understand for all villagers. Present the financial details in a neat tabular format.
 
   Total Collection: {{{totalCollection}}}
   Total Expenses: {{{totalExpenses}}}

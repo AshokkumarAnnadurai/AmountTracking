@@ -5,7 +5,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusCircle, ListMusic } from "lucide-react";
+import { PlusCircle, ListMusic, Download } from "lucide-react";
 
 import type { Program } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -74,6 +75,26 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
   }
 
   const formatCurrency = (amount: number) => `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  
+  const handleDownload = () => {
+    const headers = ["Name", "Organizer", "Budgeted Amount", "Notes"];
+    const csvContent = [
+      headers.join(","),
+      ...programs.map(p => [p.name, p.organizer, p.budgetedAmount, `"${p.notes || ''}"`].join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", "programs.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -147,7 +168,7 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
         </Dialog>
       </CardHeader>
       <CardContent className="flex-grow">
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[350px]">
         {programs.length > 0 ? (
           <Accordion type="single" collapsible className="w-full">
             {programs.map((p) => (
@@ -174,6 +195,12 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
         )}
         </ScrollArea>
       </CardContent>
+       <CardFooter className="justify-end border-t pt-4">
+        <Button variant="outline" size="sm" onClick={handleDownload} disabled={programs.length === 0}>
+          <Download className="h-3.5 w-3.5 mr-2" />
+          {t('download')}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
