@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -45,11 +46,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLanguage } from "@/hooks/use-language";
 
-const contributionSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  amount: z.coerce.number().positive({ message: "Amount must be positive." }),
+const contributionSchema = (t: Function) => z.object({
+  name: z.string().min(2, { message: t('validation.name.min') }),
+  amount: z.coerce.number().positive({ message: t('validation.amount.positive') }),
 });
+
 
 interface ContributionsCardProps {
   contributors: Contributor[];
@@ -59,22 +62,24 @@ interface ContributionsCardProps {
 export function ContributionsCard({ contributors, onAddContributor }: ContributionsCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof contributionSchema>>({
-    resolver: zodResolver(contributionSchema),
+  const { t } = useLanguage();
+  
+  const form = useForm<z.infer<ReturnType<typeof contributionSchema>>>({
+    resolver: zodResolver(contributionSchema(t)),
     defaultValues: { name: "", amount: 0 },
   });
 
-  async function onSubmit(values: z.infer<typeof contributionSchema>) {
+  async function onSubmit(values: z.infer<ReturnType<typeof contributionSchema>>) {
     await onAddContributor(values);
     toast({
-      title: "Success!",
-      description: `${values.name} has been added to contributors.`,
+      title: t('toast.success'),
+      description: t('toast.contributorAdded', { name: values.name }),
     });
     form.reset();
     setIsOpen(false);
   }
   
-  const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  const formatCurrency = (amount: number) => `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
   const formatDate = (date: Date | Timestamp) => {
     return format(date instanceof Date ? date : date.toDate(), "PPP");
   }
@@ -83,9 +88,9 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>Contributions</CardTitle>
+          <CardTitle>{t('contributions.title')}</CardTitle>
           <CardDescription>
-            List of all contributions from villagers.
+            {t('contributions.description')}
           </CardDescription>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -93,7 +98,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
             <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add New
+                {t('addNew')}
               </span>
             </Button>
           </DialogTrigger>
@@ -101,9 +106,9 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <DialogHeader>
-                  <DialogTitle>Add New Contribution</DialogTitle>
+                  <DialogTitle>{t('contributions.form.title')}</DialogTitle>
                   <DialogDescription>
-                    Enter the contributor's name and the amount they donated.
+                    {t('contributions.form.description')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -112,9 +117,9 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contributor's Name</FormLabel>
+                        <FormLabel>{t('contributions.form.nameLabel')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Anand" {...field} />
+                          <Input placeholder={t('contributions.form.namePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -125,9 +130,9 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Amount (Rs)</FormLabel>
+                        <FormLabel>{t('contributions.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="e.g. 1001" {...field} />
+                          <Input type="number" placeholder={t('contributions.form.amountPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -135,7 +140,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
                   />
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Add Contribution</Button>
+                  <Button type="submit">{t('contributions.form.submit')}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -147,8 +152,8 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Contributor</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>{t('contributions.table.contributor')}</TableHead>
+                <TableHead className="text-right">{t('contributions.table.amount')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -167,7 +172,7 @@ export function ContributionsCard({ contributors, onAddContributor }: Contributi
               ) : (
                 <TableRow>
                   <TableCell colSpan={2} className="h-24 text-center">
-                    No contributions yet. Add one to get started.
+                    {t('contributions.table.noContributions')}
                   </TableCell>
                 </TableRow>
               )}

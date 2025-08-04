@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -27,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { generateWhatsappSummary } from "@/ai/flows/generate-whatsapp-summary";
 import type { Program } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/hooks/use-language";
 
 interface SummaryCardsProps {
   totalCollection: number;
@@ -47,9 +49,10 @@ export function SummaryCards({
   const [isDialogOpen, setDialogOpen] = React.useState(false);
   const [summary, setSummary] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const { t } = useLanguage();
 
   const formatCurrency = (amount: number) => {
-    return `Rs ${new Intl.NumberFormat("en-IN", {
+    return `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", {
       minimumFractionDigits: 0,
     }).format(amount)}`;
   };
@@ -69,8 +72,8 @@ export function SummaryCards({
       console.error("Failed to generate summary:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to generate AI summary. Please try again.",
+        title: t('summaryGenerationErrorTitle'),
+        description: t('summaryGenerationErrorDescription'),
       });
     } finally {
       setIsLoading(false);
@@ -80,8 +83,8 @@ export function SummaryCards({
   const handleCopy = () => {
     navigator.clipboard.writeText(summary);
     toast({
-      title: "Copied!",
-      description: "Summary copied to clipboard.",
+      title: t('copiedTitle'),
+      description: t('copiedDescription'),
     });
   };
 
@@ -98,7 +101,7 @@ export function SummaryCards({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Collection
+              {t('totalCollection')}
             </CardTitle>
             <Landmark className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -110,7 +113,7 @@ export function SummaryCards({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalExpenses')}</CardTitle>
             <ReceiptText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -122,7 +125,7 @@ export function SummaryCards({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Remaining Balance
+              {t('remainingBalance')}
             </CardTitle>
             <Scale className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -134,7 +137,7 @@ export function SummaryCards({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Budget vs Collection</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('budgetVsCollection')}</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -142,7 +145,7 @@ export function SummaryCards({
                 {formatCurrency(budgetStatus)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {budgetStatus >= 0 ? "Surplus" : "Needed"}
+                {budgetStatus >= 0 ? t('surplus') : t('needed')}
               </p>
           </CardContent>
         </Card>
@@ -155,16 +158,16 @@ export function SummaryCards({
           }}
         >
           <MessageCircle className="mr-2 h-5 w-5" />
-          Share Summary
+          {t('shareSummary')}
         </Button>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Share Festival Summary</DialogTitle>
+            <DialogTitle>{t('shareFestivalSummary')}</DialogTitle>
             <DialogDescription>
-              Share this AI-generated summary with villagers on WhatsApp.
+              {t('shareSummaryDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -177,7 +180,7 @@ export function SummaryCards({
                 readOnly
                 value={summary}
                 className="h-40 resize-none"
-                placeholder="AI-generated summary will appear here..."
+                placeholder={t('summaryPlaceholder')}
               />
             )}
           </div>
@@ -187,14 +190,14 @@ export function SummaryCards({
               onClick={handleCopy}
               disabled={!summary || isLoading}
             >
-              <Copy className="mr-2 h-4 w-4" /> Copy
+              <Copy className="mr-2 h-4 w-4" /> {t('copy')}
             </Button>
             <Button
               onClick={handleShare}
               disabled={!summary || isLoading}
               className="bg-green-500 hover:bg-green-600 text-white"
             >
-              <MessageCircle className="mr-2 h-4 w-4" /> Share on WhatsApp
+              <MessageCircle className="mr-2 h-4 w-4" /> {t('shareOnWhatsApp')}
             </Button>
           </DialogFooter>
         </DialogContent>

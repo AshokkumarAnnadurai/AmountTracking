@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -37,12 +38,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "../ui/scroll-area";
+import { useLanguage } from "@/hooks/use-language";
 
 
-const programSchema = z.object({
-  name: z.string().min(3, { message: "Program name must be at least 3 characters." }),
-  organizer: z.string().min(2, { message: "Organizer name must be at least 2 characters." }),
-  budgetedAmount: z.coerce.number().positive({ message: "Budget must be a positive number." }),
+const programSchema = (t: Function) => z.object({
+  name: z.string().min(3, { message: t('validation.programName.min') }),
+  organizer: z.string().min(2, { message: t('validation.organizer.min') }),
+  budgetedAmount: z.coerce.number().positive({ message: t('validation.budget.positive') }),
   notes: z.string().optional(),
 });
 
@@ -54,30 +56,32 @@ interface ProgramsCardProps {
 export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof programSchema>>({
-    resolver: zodResolver(programSchema),
+  const { t } = useLanguage();
+
+  const form = useForm<z.infer<ReturnType<typeof programSchema>>>({
+    resolver: zodResolver(programSchema(t)),
     defaultValues: { name: "", organizer: "", budgetedAmount: 0, notes: "" },
   });
 
-  async function onSubmit(values: z.infer<typeof programSchema>) {
+  async function onSubmit(values: z.infer<ReturnType<typeof programSchema>>) {
     await onAddProgram(values);
     toast({
-      title: "Success!",
-      description: `Program "${values.name}" has been added.`,
+      title: t('toast.success'),
+      description: t('toast.programAdded', { name: values.name }),
     });
     form.reset();
     setIsOpen(false);
   }
 
-  const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  const formatCurrency = (amount: number) => `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>Cultural Programs</CardTitle>
+          <CardTitle>{t('programs.title')}</CardTitle>
           <CardDescription>
-            List of events planned for the festival.
+            {t('programs.description')}
           </CardDescription>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -85,7 +89,7 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
             <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add New
+                {t('addNew')}
               </span>
             </Button>
           </DialogTrigger>
@@ -93,23 +97,23 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <DialogHeader>
-                  <DialogTitle>Add New Program</DialogTitle>
+                  <DialogTitle>{t('programs.form.title')}</DialogTitle>
                   <DialogDescription>
-                    Enter the details of the cultural program.
+                    {t('programs.form.description')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <FormField name="name" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Program Name</FormLabel>
-                      <FormControl><Input placeholder="e.g. Kerala Sendai Melam" {...field} /></FormControl>
+                      <FormLabel>{t('programs.form.nameLabel')}</FormLabel>
+                      <FormControl><Input placeholder={t('programs.form.namePlaceholder')} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField name="organizer" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Organizer / Team</FormLabel>
-                      <FormControl><Input placeholder="e.g. Team A" {...field} /></FormControl>
+                      <FormLabel>{t('programs.form.organizerLabel')}</FormLabel>
+                      <FormControl><Input placeholder={t('programs.form.organizerPlaceholder')} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -118,9 +122,9 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
                     name="budgetedAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Budgeted Amount (Rs)</FormLabel>
+                        <FormLabel>{t('programs.form.budgetLabel', { currency: t('currencySymbol') })}</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="e.g. 15000" {...field} />
+                          <Input type="number" placeholder={t('programs.form.budgetPlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -128,14 +132,14 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
                   />
                   <FormField name="notes" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl><Textarea placeholder="Any special instructions or contacts..." {...field} /></FormControl>
+                      <FormLabel>{t('programs.form.notesLabel')}</FormLabel>
+                      <FormControl><Textarea placeholder={t('programs.form.notesPlaceholder')} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Add Program</Button>
+                  <Button type="submit">{t('programs.form.submit')}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -154,18 +158,18 @@ export function ProgramsCard({ programs, onAddProgram }: ProgramsCardProps) {
                       <span className="font-medium">{p.name}</span>
                       <span className="font-semibold pr-2">{formatCurrency(p.budgetedAmount)}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">Organizer: {p.organizer}</span>
+                    <span className="text-sm text-muted-foreground">{t('programs.organizer')}: {p.organizer}</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{p.notes || "No notes provided."}</p>
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{p.notes || t('programs.noNotes')}</p>
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         ) : (
           <div className="flex items-center justify-center h-24 text-center text-muted-foreground">
-              No programs added yet. Add one to get started.
+              {t('programs.noPrograms')}
           </div>
         )}
         </ScrollArea>

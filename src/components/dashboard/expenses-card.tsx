@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -52,12 +53,13 @@ import { Badge } from "@/components/ui/badge";
 import { CategoryIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLanguage } from "@/hooks/use-language";
 
-const expenseSchema = z.object({
-  reason: z.string().min(3, { message: "Reason must be at least 3 characters." }),
-  amount: z.coerce.number().positive({ message: "Amount must be positive." }),
+const expenseSchema = (t: Function) => z.object({
+  reason: z.string().min(3, { message: t('validation.reason.min') }),
+  amount: z.coerce.number().positive({ message: t('validation.amount.positive') }),
   date: z.date(),
-  category: z.enum(expenseCategories),
+  category: z.enum(expenseCategories, { errorMap: () => ({ message: t('validation.category.required') }) }),
 });
 
 interface ExpensesCardProps {
@@ -68,22 +70,24 @@ interface ExpensesCardProps {
 export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof expenseSchema>>({
-    resolver: zodResolver(expenseSchema),
+  const { t } = useLanguage();
+
+  const form = useForm<z.infer<ReturnType<typeof expenseSchema>>>({
+    resolver: zodResolver(expenseSchema(t)),
     defaultValues: { reason: "", amount: 0, date: new Date(), category: 'Miscellaneous' },
   });
 
-  async function onSubmit(values: z.infer<typeof expenseSchema>) {
+  async function onSubmit(values: z.infer<ReturnType<typeof expenseSchema>>) {
     await onAddExpense(values);
     toast({
-      title: "Success!",
-      description: `Expense for ${values.reason} has been added.`,
+      title: t('toast.success'),
+      description: t('toast.expenseAdded', { reason: values.reason }),
     });
     form.reset();
     setIsOpen(false);
   }
   
-  const formatCurrency = (amount: number) => `Rs ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
+  const formatCurrency = (amount: number) => `${t('currencySymbol')} ${new Intl.NumberFormat("en-IN", { minimumFractionDigits: 0 }).format(amount)}`;
   const formatDate = (date: Date | Timestamp) => {
     return format(date instanceof Date ? date : date.toDate(), "PPP");
   }
@@ -92,15 +96,15 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>Expenses</CardTitle>
-          <CardDescription>All recorded festival expenses.</CardDescription>
+          <CardTitle>{t('expenses.title')}</CardTitle>
+          <CardDescription>{t('expenses.description')}</CardDescription>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="ml-auto gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add New
+                {t('addNew')}
               </span>
             </Button>
           </DialogTrigger>
@@ -108,42 +112,42 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <DialogHeader>
-                  <DialogTitle>Add New Expense</DialogTitle>
+                  <DialogTitle>{t('expenses.form.title')}</DialogTitle>
                   <DialogDescription>
-                    Enter the details of the expense.
+                    {t('expenses.form.description')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <FormField name="reason" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reason</FormLabel>
+                      <FormLabel>{t('expenses.form.reasonLabel')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Stage Decoration" {...field} />
+                        <Input placeholder={t('expenses.form.reasonPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField name="amount" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount (Rs)</FormLabel>
+                      <FormLabel>{t('expenses.form.amountLabel', { currency: t('currencySymbol') })}</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g. 5000" {...field} />
+                        <Input type="number" placeholder={t('expenses.form.amountPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                    <FormField name="category" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>{t('expenses.form.categoryLabel')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder={t('expenses.form.categoryPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {expenseCategories.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            <SelectItem key={cat} value={cat}>{t(`expenseCategories.${cat}`)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -152,12 +156,12 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
                   )} />
                   <FormField name="date" control={form.control} render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Date of Expense</FormLabel>
+                      <FormLabel>{t('expenses.form.dateLabel')}</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                              {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                              {field.value ? format(field.value, "PPP") : <span>{t('expenses.form.datePlaceholder')}</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -171,7 +175,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
                   )} />
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Add Expense</Button>
+                  <Button type="submit">{t('expenses.form.submit')}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -183,8 +187,8 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Details</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>{t('expenses.table.details')}</TableHead>
+              <TableHead className="text-right">{t('expenses.table.amount')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -206,7 +210,7 @@ export function ExpensesCard({ expenses, onAddExpense }: ExpensesCardProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={2} className="h-24 text-center">
-                  No expenses yet. Add one to get started.
+                  {t('expenses.table.noExpenses')}
                 </TableCell>
               </TableRow>
             )}

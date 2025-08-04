@@ -11,7 +11,7 @@ import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { ContributionsCard } from "@/components/dashboard/contributions-card";
 import { ExpensesCard } from "@/components/dashboard/expenses-card";
 import { ProgramsCard } from "@/components/dashboard/programs-card";
-import { Sparkles, Loader2, Calendar } from "lucide-react";
+import { Sparkles, Loader2, Calendar, Languages } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
+import { LanguageProvider, useLanguage } from "@/hooks/use-language";
 
 const getYears = () => {
   const currentYear = new Date().getFullYear();
@@ -30,13 +30,14 @@ const getYears = () => {
   return years;
 };
 
-export default function UtsavHisabDashboard() {
+function UtsavHisabDashboardContent() {
   const [contributors, setContributors] = React.useState<Contributor[]>([]);
   const [expenses, setExpenses] = React.useState<Expense[]>([]);
   const [programs, setPrograms] = React.useState<Program[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [selectedYear, setSelectedYear] = React.useState(new Date().getFullYear());
   const availableYears = getYears();
+  const { t, setLanguage, language } = useLanguage();
 
   React.useEffect(() => {
     async function loadData() {
@@ -98,7 +99,7 @@ export default function UtsavHisabDashboard() {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading Festival Data for {selectedYear}...</p>
+        <p className="mt-4 text-muted-foreground">{t('loading', { year: selectedYear })}</p>
       </div>
     );
   }
@@ -107,8 +108,24 @@ export default function UtsavHisabDashboard() {
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
         <Sparkles className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-semibold text-foreground">Utsav Hisab</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t('appTitle')}</h1>
         <div className="ml-auto flex items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Languages className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only sm:ml-2">{language === 'en' ? 'English' : 'தமிழ்'}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setLanguage('en')}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setLanguage('ta')}>
+                தமிழ்
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
@@ -151,4 +168,12 @@ export default function UtsavHisabDashboard() {
       </main>
     </div>
   );
+}
+
+export default function UtsavHisabDashboard() {
+  return (
+    <LanguageProvider>
+      <UtsavHisabDashboardContent />
+    </LanguageProvider>
+  )
 }

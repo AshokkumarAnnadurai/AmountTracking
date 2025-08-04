@@ -1,0 +1,129 @@
+
+{
+  "appTitle": "Utsav Hisab",
+  "loading": "Loading Festival Data for {{year}}...",
+  "currencySymbol": "Rs",
+  "addNew": "Add New",
+
+  "totalCollection": "Total Collection",
+  "totalExpenses": "Total Expenses",
+  "remainingBalance": "Remaining Balance",
+  "budgetVsCollection": "Budget vs Collection",
+  "surplus": "Surplus",
+  "needed": "Needed",
+
+  "shareSummary": "Share Summary",
+  "shareFestivalSummary": "Share Festival Summary",
+  "shareSummaryDescription": "Share this AI-generated summary with villagers on WhatsApp.",
+  "summaryPlaceholder": "AI-generated summary will appear here...",
+  "copy": "Copy",
+  "shareOnWhatsApp": "Share on WhatsApp",
+
+  "summaryGenerationErrorTitle": "Error",
+  "summaryGenerationErrorDescription": "Failed to generate AI summary. Please try again.",
+  "copiedTitle": "Copied!",
+  "copiedDescription": "Summary copied to clipboard.",
+
+  "contributions": {
+    "title": "Contributions",
+    "description": "List of all contributions from villagers.",
+    "form": {
+      "title": "Add New Contribution",
+      "description": "Enter the contributor's name and the amount they donated.",
+      "nameLabel": "Contributor's Name",
+      "namePlaceholder": "e.g. Anand",
+      "amountLabel": "Amount ({{currency}})",
+      "amountPlaceholder": "e.g. 1001",
+      "submit": "Add Contribution"
+    },
+    "table": {
+      "contributor": "Contributor",
+      "amount": "Amount",
+      "noContributions": "No contributions yet. Add one to get started."
+    }
+  },
+
+  "expenses": {
+    "title": "Expenses",
+    "description": "All recorded festival expenses.",
+    "form": {
+      "title": "Add New Expense",
+      "description": "Enter the details of the expense.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "e.g. Stage Decoration",
+      "amountLabel": "Amount ({{currency}})",
+      "amountPlaceholder": "e.g. 5000",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "Select a category",
+      "dateLabel": "Date of Expense",
+      "datePlaceholder": "Pick a date",
+      "submit": "Add Expense"
+    },
+    "table": {
+      "details": "Details",
+      "amount": "Amount",
+      "noExpenses": "No expenses yet. Add one to get started."
+    }
+  },
+
+  "programs": {
+    "title": "Cultural Programs",
+    "description": "List of events planned for the festival.",
+    "organizer": "Organizer",
+    "noNotes": "No notes provided.",
+    "noPrograms": "No programs added yet. Add one to get started.",
+    "form": {
+      "title": "Add New Program",
+      "description": "Enter the details of the cultural program.",
+      "nameLabel": "Program Name",
+      "namePlaceholder": "e.g. Kerala Sendai Melam",
+      "organizerLabel": "Organizer / Team",
+      "organizerPlaceholder": "e.g. Team A",
+      "budgetLabel": "Budgeted Amount ({{currency}})",
+      "budgetPlaceholder": "e.g. 15000",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Any special instructions or contacts...",
+      "submit": "Add Program"
+    }
+  },
+
+  "expenseCategories": {
+    "Food": "Food",
+    "Decoration": "Decoration",
+    "Cultural Event": "Cultural Event",
+    "Pooja": "Pooja",
+    "Travel": "Travel",
+    "Miscellaneous": "Miscellaneous"
+  },
+
+  "toast": {
+    "success": "Success!",
+    "contributorAdded": "{{name}} has been added to contributors.",
+    "expenseAdded": "Expense for {{reason}} has been added.",
+    "programAdded": "Program \"{{name}}\" has been added."
+  },
+
+  "validation": {
+    "name": {
+      "min": "Name must be at least 2 characters."
+    },
+    "amount": {
+      "positive": "Amount must be positive."
+    },
+    "reason": {
+      "min": "Reason must be at least 3 characters."
+    },
+    "category": {
+      "required": "Please select a category."
+    },
+    "programName": {
+      "min": "Program name must be at least 3 characters."
+    },
+    "organizer": {
+      "min": "Organizer name must be at least 2 characters."
+    },
+    "budget": {
+      "positive": "Budget must be a positive number."
+    }
+  }
+}
