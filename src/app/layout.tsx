@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Utsav Hisab',
+  title: 'Tally',
   description: 'Manage festival contributions and expenses',
 };
 
