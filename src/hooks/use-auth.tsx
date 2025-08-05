@@ -15,20 +15,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_UID = "eXLsuSXlWXU9F9y3UogABV6mNnn2";
+const ADMIN_UIDS_STRING = process.env.NEXT_PUBLIC_ADMIN_UID;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkIsAdmin = (currentUser: User | null) => {
+    if (!currentUser || !ADMIN_UIDS_STRING) {
+      return false;
+    }
+    const adminUids = ADMIN_UIDS_STRING.split(',').map(uid => uid.trim());
+    return adminUids.includes(currentUser.uid);
+  };
+
   useEffect(() => {
-    if (!ADMIN_UID) {
+    if (!ADMIN_UIDS_STRING) {
       console.error("NEXT_PUBLIC_ADMIN_UID is not set in the environment variables.");
     }
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsAdmin(!!currentUser && !!ADMIN_UID && currentUser.uid === ADMIN_UID);
+      setIsAdmin(checkIsAdmin(currentUser));
       setLoading(false);
     });
     return () => unsubscribe();
@@ -36,16 +44,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithEmail = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    // Explicitly update state after sign-in to ensure UI reacts immediately
     const loggedInUser = userCredential.user;
     setUser(loggedInUser);
-    setIsAdmin(!!loggedInUser && !!ADMIN_UID && loggedInUser.uid === ADMIN_UID);
+    setIsAdmin(checkIsAdmin(loggedInUser));
   };
 
   const performSignOut = async () => {
     try {
       await signOut(auth);
-      // Explicitly clear state on sign-out
       setUser(null);
       setIsAdmin(false);
     } catch (error) {
