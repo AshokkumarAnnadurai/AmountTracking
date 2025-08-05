@@ -15,7 +15,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_UIDS_STRING = process.env.NEXT_PUBLIC_ADMIN_UID;
+const ADMIN_UIDS_STRING = ["eXLsuSXlWXU9F9y3UogABV6mNnn2","ORO64BxWlRberWDiDBkE9KuP2Se2"]
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,8 +26,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!currentUser || !ADMIN_UIDS_STRING) {
       return false;
     }
-    const adminUids = ADMIN_UIDS_STRING.split(',').map(uid => uid.trim());
-    return adminUids.includes(currentUser.uid);
+    // const adminUids = ADMIN_UIDS_STRING.split(',').map(uid => uid.trim());
+    return ADMIN_UIDS_STRING.includes(currentUser.uid);
   };
 
   useEffect(() => {
